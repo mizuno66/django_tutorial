@@ -102,6 +102,15 @@ class QuestionIndexViewTests(TestCase):
             ['<Question: Past question 2.>', '<Question: Past question 1.>']
         )
 
+    def test_no_choice_question(self):
+
+        create_question(question_text="Past question 1.", days=-30)
+        create_question(question_text="Past question 2.", days=-5)
+        response = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            response.context['latest_question_list'],[]
+        )
+
 class QuestionDetailViewTests(TestCase):
     def test_future_question(self):
         """
