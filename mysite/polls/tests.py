@@ -46,6 +46,10 @@ def create_question(question_text, days):
     time = timezone.now() + datetime.timedelta(days=days)
     return Question.objects.create(question_text=question_text, pub_date=time)
 
+def create_choice(question, choice_text, votes = 0):
+
+    return question.choice_set.create(question=question, choice_text=choice_text,votes=votes)
+
 class QuestionIndexViewTests(TestCase):
     def test_no_questions(self):
         """
@@ -61,7 +65,8 @@ class QuestionIndexViewTests(TestCase):
         Questions with a pub_date in the past are displayed on the
         index page.
         """
-        create_question(question_text="Past question.", days=-30)
+        q = create_question(question_text="Past question.", days=-30)
+        create_choice(question=q,choice_text="choice1")
         response = self.client.get(reverse('polls:index'))
         self.assertQuerysetEqual(
             response.context['latest_question_list'],
@@ -73,8 +78,10 @@ class QuestionIndexViewTests(TestCase):
         Questions with a pub_date in the future aren't displayed on
         the index page.
         """
-        create_question(question_text="Past question.", days=-30)
-        create_question(question_text="Future question.", days=30)
+        q = create_question(question_text="Past question.", days=-30)
+        create_choice(question=q,choice_text="choice1")
+        q = create_question(question_text="Future question.", days=30)
+        create_choice(question=q,choice_text="choice2")
         response = self.client.get(reverse('polls:index'))
         self.assertQuerysetEqual(
             response.context['latest_question_list'],
@@ -85,8 +92,10 @@ class QuestionIndexViewTests(TestCase):
         """
         The questions index page may display multiple questions.
         """
-        create_question(question_text="Past question 1.", days=-30)
-        create_question(question_text="Past question 2.", days=-5)
+        q = create_question(question_text="Past question 1.", days=-30)
+        create_choice(question=q,choice_text="choice1")
+        q = create_question(question_text="Past question 2.", days=-5)
+        create_choice(question=q,choice_text="choice2")
         response = self.client.get(reverse('polls:index'))
         self.assertQuerysetEqual(
             response.context['latest_question_list'],
