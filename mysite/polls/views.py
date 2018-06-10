@@ -31,7 +31,7 @@ class DetailView(generic.DetailView):
         return Question.objects.filter(
             pub_date__lte=timezone.now(),
             choice__isnull=False,
-        )
+        ).distinct()
 
 class ResultsView(generic.DetailView):
     model = Question
